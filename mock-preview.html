@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>DoodleBooth — Mock Sticker Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Courier+Prime&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    padding: 24px;
+    background-color: #f7f4ed;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: #1a1a1a;
+    font-family: 'Courier Prime', monospace;
+  }
+  h1 { font-family: 'Caveat', cursive; font-weight: 700; font-size: 48px; margin: 0 0 4px; }
+  p.lede { margin: 0 0 24px; opacity: 0.85; }
+  h2 { font-family: 'Caveat', cursive; font-weight: 700; font-size: 28px; margin: 24px 0 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .card {
+    background: #fff;
+    border: 2.5px solid #1a1a1a;
+    border-radius: 6px;
+    box-shadow: 4px 4px 0 #1a1a1a;
+    padding: 14px;
+    text-align: center;
+  }
+  canvas {
+    image-rendering: pixelated;
+    border: 2px solid #1a1a1a;
+    background: transparent;
+    display: block;
+    margin: 0 auto;
+  }
+  .label { font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px; margin-top: 8px; }
+  .swatches { display: flex; gap: 3px; justify-content: center; margin-top: 6px; }
+  .swatch { width: 14px; height: 14px; border: 1.5px solid #1a1a1a; }
+</style>
+</head>
+<body>
+
+<h1>DoodleBooth — Mock Sticker Preview</h1>
+<p class="lede">A representative artifact of what Claude's pixel-art output looks like, rendered with all 6 palettes and all 4 doodle filters. (No dev server, no Claude API needed — just open this file.)</p>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="wiggle_border">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="crosshatch">
+      <feTurbulence type="turbulence" baseFrequency="0.9 0.05" numOctaves="1" seed="5" stitchTiles="stitch" result="hatchA"/>
+      <feColorMatrix in="hatchA" type="matrix" values="0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 -2 0.6" result="ink1"/>
+      <feTurbulence type="turbulence" baseFrequency="0.05 0.9" numOctaves="1" seed="11" stitchTiles="stitch" result="hatchB"/>
+      <feColorMatrix in="hatchB" type="matrix" values="0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 -2 0.6" result="ink2"/>
+      <feComposite in="ink1" in2="ink2" operator="over" result="hatching"/>
+      <feComposite in="hatching" in2="SourceGraphic" operator="in" result="innerHatch"/>
+      <feComposite in="innerHatch" in2="SourceGraphic" operator="over"/>
+    </filter>
+    <filter id="star_burst">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="expand"/>
+      <feGaussianBlur in="expand" stdDeviation="3" result="halo"/>
+      <feColorMatrix in="halo" type="matrix" values="0 0 0 0 1  0 0 0 0 0.82  0 0 0 0 0.40  0 0 0 1 0" result="yellowHalo"/>
+      <feMerge>
+        <feMergeNode in="yellowHalo"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="none">
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+    </filter>
+  </defs>
+</svg>
+
+<h2>All 6 palettes (wiggle filter)</h2>
+<div class="grid" id="palette-grid"></div>
+
+<h2>All 4 filters (Banana Cream palette)</h2>
+<div class="grid" id="filter-grid"></div>
+
+<h2>4 mock expressions (Banana Cream + wiggle)</h2>
+<div class="grid" id="expression-grid"></div>
+
+<script>
+const PALETTES = {
+  "Banana Cream": ["#ffd166","#ff8c42","#1a1a1a","#fffef8","#e8c84e","#c4a430","#7a5c00","#f0e8cc"],
+  "Hot Pink":     ["#ff6b9d","#b57bee","#1a1a1a","#fff0f6","#e0409a","#9b3bcb","#5c0044","#ffe0f0"],
+  "Retro Teal":   ["#4ecdc4","#06d6a0","#1a1a2e","#e0fff8","#2aada4","#00b882","#004040","#a0fff0"],
+  "Gameboy":      ["#9bbc0f","#8bac0f","#306230","#0f380f","#c4d830","#588018","#1c4000","#e0f8d0"],
+  "Noir":         ["#f0f0f0","#cccccc","#888888","#444444","#1a1a1a","#000000","#ffffff","#aaaaaa"],
+  "Grape Crush":  ["#b57bee","#7c3aed","#2e1065","#faf0ff","#d4a0ff","#9b30f0","#4a0090","#e8d0ff"],
+};
+
+const FILTERS = ["wiggle_border", "crosshatch", "star_burst", "none"];
+const FILTER_LABELS = { wiggle_border: "Wiggle", crosshatch: "Crosshatch", star_burst: "Star burst", none: "Plain" };
+
+const EXPRESSIONS = ["happy", "cool", "surprised", "sleepy"];
+
+// ────────── face generator (mirrors mockSuccess in route.ts) ──────────
+function makeFace(seed) {
+  const W = 64, H = 64;
+  const pixels = Array.from({ length: H }, () => new Array(W).fill(7));
+  const setPx = (x, y, v) => { if (x >= 0 && y >= 0 && x < W && y < H) pixels[y][x] = v; };
+  const fillCircle = (cx, cy, r, v) => {
+    for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x*x + y*y <= r*r) setPx(cx+x, cy+y, v);
+  };
+  const tilt = (seed % 5) - 2;
+  const hairTone = (seed & 1) ? 5 : 6;
+  const expressionIdx = seed % 5;
+  const cx = 32, cy = 36, faceRX = 20, faceRY = 23;
+
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const dx = (x-cx)/faceRX, dy = (y-cy)/faceRY;
+    if (dx*dx + dy*dy <= 1) pixels[y][x] = 0;
+  }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (pixels[y][x] !== 0) continue;
+    const dx = (x-cx)/faceRX, dy = (y-cy)/faceRY;
+    if (dx > 0.4 && dx*dx + dy*dy > 0.6) pixels[y][x] = 4;
+  }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const dx = (x-cx)/(faceRX+2), dy = (y-22)/(faceRY+4);
+    if (dx*dx + dy*dy <= 1 && y < cy-2) pixels[y][x] = hairTone;
+  }
+  for (let y = cy-6; y < cy+8; y++) {
+    for (let x = 8; x < 14; x++) {
+      const dx = (x-11)/4, dy = (y-cy)/10;
+      if (dx*dx + dy*dy <= 1) pixels[y][x] = hairTone;
+    }
+    for (let x = 50; x < 56; x++) {
+      const dx = (x-53)/4, dy = (y-cy)/10;
+      if (dx*dx + dy*dy <= 1) pixels[y][x] = hairTone;
+    }
+  }
+  const eyeY = 32 + tilt, mouthY = 46;
+  fillCircle(22, eyeY, 2, 3); fillCircle(42, eyeY, 2, 3);
+  fillCircle(22, eyeY, 1, 2); fillCircle(42, eyeY, 1, 2);
+  fillCircle(19, 41, 1, 1); fillCircle(45, 41, 1, 1);
+
+  if (expressionIdx === 0) {
+    for (let i = -4; i <= 4; i++) setPx(32+i, mouthY + Math.floor(Math.abs(i)*0.4), 2);
+  } else if (expressionIdx === 1) {
+    fillCircle(22, eyeY, 3, 2); fillCircle(42, eyeY, 3, 2);
+    for (let i = 26; i <= 38; i++) setPx(i, eyeY, 2);
+    for (let i = -4; i <= 4; i++) setPx(32+i, mouthY, 2);
+  } else if (expressionIdx === 2) {
+    fillCircle(32, mouthY+1, 2, 2); setPx(32, mouthY+1, 3);
+  } else if (expressionIdx === 3) {
+    fillCircle(22, eyeY, 2, 0); fillCircle(42, eyeY, 2, 0);
+    for (let i = -2; i <= 2; i++) setPx(22+i, eyeY, 2);
+    for (let i = -2; i <= 2; i++) setPx(42+i, eyeY, 2);
+    for (let i = -1; i <= 1; i++) setPx(32+i, mouthY, 2);
+  } else {
+    for (let i = -2; i <= 2; i++) setPx(32+i, mouthY, 2);
+  }
+
+  const orig = pixels.map(r => [...r]);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (orig[y][x] !== 7) continue;
+    const hasNbr =
+      (x > 0 && orig[y][x-1] !== 7) ||
+      (x < W-1 && orig[y][x+1] !== 7) ||
+      (y > 0 && orig[y-1][x] !== 7) ||
+      (y < H-1 && orig[y+1][x] !== 7);
+    if (hasNbr) pixels[y][x] = 2;
+  }
+  return pixels;
+}
+
+function hexToRgb(h) {
+  const n = parseInt(h.startsWith("#") ? h.slice(1) : h, 16);
+  return [(n>>16)&255, (n>>8)&255, n&255];
+}
+
+function renderFace(canvas, pixels, palette) {
+  const off = document.createElement('canvas');
+  off.width = 64; off.height = 64;
+  const offCtx = off.getContext('2d');
+  const data = offCtx.createImageData(64, 64);
+  for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) {
+    const idx = pixels[y][x];
+    const [r,g,b] = hexToRgb(palette[idx] || palette[0]);
+    const o = (y*64 + x) * 4;
+    data.data[o] = r; data.data[o+1] = g; data.data[o+2] = b; data.data[o+3] = 255;
+  }
+  offCtx.putImageData(data, 0, 0);
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(off, 0, 0, 64, 64, 0, 0, canvas.width, canvas.height);
+}
+
+function makeCard(label, palette, filterId, face) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 256;
+  canvas.style.filter = `url(#${filterId})`;
+  card.appendChild(canvas);
+  const lbl = document.createElement('div');
+  lbl.className = 'label';
+  lbl.textContent = label;
+  card.appendChild(lbl);
+  const swatches = document.createElement('div');
+  swatches.className = 'swatches';
+  for (const c of palette.slice(0, 8)) {
+    const s = document.createElement('div');
+    s.className = 'swatch';
+    s.style.background = c;
+    swatches.appendChild(s);
+  }
+  card.appendChild(swatches);
+  renderFace(canvas, face, palette);
+  return card;
+}
+
+// Section 1: all 6 palettes (with the "happy" face + wiggle filter)
+const happyFace = makeFace(0);
+const paletteGrid = document.getElementById('palette-grid');
+for (const [name, palette] of Object.entries(PALETTES)) {
+  paletteGrid.appendChild(makeCard(name, palette, 'wiggle_border', happyFace));
+}
+
+// Section 2: all 4 filters with Banana Cream
+const filterGrid = document.getElementById('filter-grid');
+for (const f of FILTERS) {
+  filterGrid.appendChild(makeCard(FILTER_LABELS[f], PALETTES["Banana Cream"], f, happyFace));
+}
+
+// Section 3: 4 expressions (happy / cool / surprised / sleepy)
+const exprGrid = document.getElementById('expression-grid');
+EXPRESSIONS.forEach((label, i) => {
+  exprGrid.appendChild(makeCard(label, PALETTES["Banana Cream"], 'wiggle_border', makeFace(i)));
+});
+</script>
+</body>
+</html>

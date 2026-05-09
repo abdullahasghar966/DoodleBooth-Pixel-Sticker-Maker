@@ -1,0 +1,21 @@
+node_modules
+.next
+.swc
+out
+build
+
+# env
+.env
+.env.local
+.env*.local
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
+*.log

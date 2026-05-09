@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #f7f4ed;
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: #1a1a1a;
+    font-family: var(--font-courier), monospace;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6, button, label {
+    font-family: var(--font-caveat), cursive;
+    font-weight: 700;
+  }
+}
+
+@layer components {
+  .doodle-card {
+    background: #ffffff;
+    border: 2.5px solid #1a1a1a;
+    border-radius: 6px;
+    box-shadow: 4px 4px 0 #1a1a1a;
+  }
+
+  .doodle-btn-primary {
+    background: #1a1a1a;
+    color: #ffd166;
+    border: 2.5px solid #1a1a1a;
+    border-radius: 6px;
+    box-shadow: 3px 3px 0 #555;
+    font-family: var(--font-caveat), cursive;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+  }
+  .doodle-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 5px 5px 0 #555;
+  }
+  .doodle-btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 1px 1px 0 #555;
+  }
+
+  .doodle-btn-secondary {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 2.5px solid #1a1a1a;
+    border-radius: 6px;
+    box-shadow: 3px 3px 0 #1a1a1a;
+    font-family: var(--font-caveat), cursive;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+  }
+  .doodle-btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 5px 5px 0 #1a1a1a;
+  }
+  .doodle-btn-secondary:active {
+    transform: translateY(1px);
+    box-shadow: 1px 1px 0 #1a1a1a;
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1.5deg); }
+  75% { transform: rotate(1.5deg); }
+}
+.wiggle-on-hover:hover {
+  animation: wiggle 0.3s ease-in-out;
+}
