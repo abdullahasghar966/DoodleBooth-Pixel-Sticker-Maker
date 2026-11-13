@@ -111,7 +111,7 @@ NEXT_PUBLIC_MOCK_CLAUDE=true
 
 ### Mock vs real Claude
 
-- **Mock mode** (`NEXT_PUBLIC_MOCK_CLAUDE=true`) — no API key needed. `/api/pixelate` returns a procedurally-generated face with per-shot variation (head tilt, hair tone, expression, overlay all rotate). Use this for UI iteration.
+- **Mock mode** (`NEXT_PUBLIC_MOCK_CLAUDE=true`, or no `ANTHROPIC_API_KEY` set) — no API key needed. `/api/pixelate` returns a procedurally-generated face with per-shot variation (head tilt, hair tone, expression, overlay all rotate). Use this for UI iteration.
 - **Real mode** — set `ANTHROPIC_API_KEY=sk-ant-...`, set `NEXT_PUBLIC_MOCK_CLAUDE=false`, restart the dev server. Each session = 4 API calls. Each call to `claude-opus-4-5` is roughly $0.01–0.03 with vision input.
 
 ---

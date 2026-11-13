@@ -364,6 +364,7 @@ function ReviewStage({
               boxShadow: "3px 3px 0 #1a1a1a",
             }}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element -- in-memory camera snapshot (data URL); next/image cannot optimise it */}
             <img
               src={`data:image/jpeg;base64,${shot}`}
               alt={`Shot ${i + 1}`}

@@ -189,6 +189,7 @@ export function StickerExport({ refs, paletteName }: StickerExportProps) {
         </button>
       </div>
       {previewUrl && (
+        // eslint-disable-next-line @next/next/no-img-element -- client-generated object URL; next/image cannot optimise it
         <img
           src={previewUrl}
           alt="4-frame strip preview"

@@ -290,13 +290,22 @@ function mockSuccess(seed = 0): PixelateSuccess {
   };
 }
 
+// Demo mode: explicit flag, or no Anthropic key configured (so a deployment
+// without secrets still works end to end with procedural stickers).
+function isMockMode(): boolean {
+  return (
+    process.env.NEXT_PUBLIC_MOCK_CLAUDE === "true" ||
+    !process.env.ANTHROPIC_API_KEY
+  );
+}
+
 export async function POST(req: NextRequest) {
   // Body parse — needed both in mock mode (for seed) and real mode.
   let body: unknown;
   try {
     body = await req.json();
   } catch {
-    if (process.env.NEXT_PUBLIC_MOCK_CLAUDE === "true") {
+    if (isMockMode()) {
       // Mock mode tolerates a missing body — just use seed 0.
       return NextResponse.json(mockSuccess(0));
     }
@@ -306,7 +315,7 @@ export async function POST(req: NextRequest) {
   // Mock mode short-circuit — no API call, no rate-limit accounting.
   // Seed the mock from the request payload so the 4 shots in a session
   // produce 4 visually distinct stickers.
-  if (process.env.NEXT_PUBLIC_MOCK_CLAUDE === "true") {
+  if (isMockMode()) {
     const ib = (body as { imageBase64?: unknown })?.imageBase64;
     const seed = typeof ib === "string" ? ib.length : 0;
     return NextResponse.json(mockSuccess(seed));
