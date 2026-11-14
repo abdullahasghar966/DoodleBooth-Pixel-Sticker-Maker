@@ -1,5 +1,7 @@
 # DoodleBooth 🎞️
 
+**🔗 Live site:** [doodle-booth-pixel-sticker-maker.vercel.app](https://doodle-booth-pixel-sticker-maker.vercel.app) — demo mode: stickers are generated procedurally, no API key
+
 A Claude-powered pixel-art photobooth web app. Take 4 quick webcam shots → Claude Vision pixelates each one into an 8-bit doodle sticker → customize the palette, pick an overlay filter, and download.
 
 Fast. Playful. Privacy-first — **photos never leave your device**.
